@@ -1,0 +1,55 @@
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Registro de Usuario</h2>
+  
+  <form (ngSubmit)="registrar()">
+    <div class="mb-3">
+      <label for="nombre" class="form-label">Nombre</label>
+      <input class="form-control" id="nombre" [(ngModel)]="usuario.nombre" name="nombre" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="correo" class="form-label">Correo</label>
+      <input class="form-control" id="correo" [(ngModel)]="usuario.correo" name="correo" required />
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">Contraseña</label>
+      <input class="form-control" type="password" id="password" [(ngModel)]="usuario.password" name="password" required />
+    </div>
+
+    <!-- Campos de Empresa, solo si el tipo de usuario es 'empleador' -->
+    <div class="mb-3" *ngIf="usuario.tipoUsuario === 'empleador'">
+      <label for="nombreEmpresa" class="form-label">Nombre de la Empresa</label>
+      <input class="form-control" id="nombreEmpresa" [(ngModel)]="usuario.nombreEmpresa" name="nombreEmpresa" />
+    </div>
+
+    <div class="mb-3" *ngIf="usuario.tipoUsuario === 'empleador'">
+      <label for="ruc" class="form-label">RUC</label>
+      <input class="form-control" id="ruc" [(ngModel)]="usuario.ruc" name="ruc" />
+    </div>
+
+    <div class="mb-3" *ngIf="usuario.tipoUsuario === 'empleador'">
+      <label for="sector" class="form-label">Sector</label>
+      <input class="form-control" id="sector" [(ngModel)]="usuario.sector" name="sector" />
+    </div>
+
+    <div class="mb-3" *ngIf="usuario.tipoUsuario === 'empleador'">
+      <label for="direccion" class="form-label">Dirección</label>
+      <input class="form-control" id="direccion" [(ngModel)]="usuario.direccion" name="direccion" />
+    </div>
+
+    <div class="mb-3" *ngIf="usuario.tipoUsuario === 'empleador'">
+      <label for="estadoCumplimiento" class="form-label">Estado de Cumplimiento</label>
+      <input class="form-control" id="estadoCumplimiento" [(ngModel)]="usuario.estadoCumplimiento" name="estadoCumplimiento" />
+    </div>
+
+    <!-- Botón de Registro -->
+    <button class="btn btn-primary w-100 mt-3" type="submit">Registrar</button>
+
+    <!-- Mensajes de Éxito y Error -->
+    <div class="text-danger mt-2" *ngIf="error">{{ error }}</div>
+    <div class="text-success mt-2" *ngIf="exito">
+      ✅ Usuario registrado con éxito. Redirigiendo al login...
+    </div>
+  </form>
+</div>

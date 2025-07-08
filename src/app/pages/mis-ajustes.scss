@@ -1,0 +1,32 @@
+/* Estilo para la tabla */
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #343a40;
+  color: white;
+}
+
+button {
+  margin-right: 5px;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Estilo para los mensajes de alerta */
+.alert-info {
+  padding: 10px;
+  background-color: #d9edf7;
+  color: #31708f;
+  border-radius: 4px;
+}

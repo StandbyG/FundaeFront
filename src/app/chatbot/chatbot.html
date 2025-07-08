@@ -1,0 +1,25 @@
+<div class="chatbot-container">
+  <!-- Título del Chatbot -->
+  <div class="chatbot-header">
+    <h2>ROBOAMIGO</h2>
+    <p>¡Hola! ¿Cómo puedo ayudarte hoy?</p>
+  </div>
+
+  <!-- Contenedor de los mensajes -->
+  <div class="chatbot-messages">
+    <div *ngFor="let message of messages" class="message">
+      <div class="user-message">
+        <div class="message-bubble user-bubble">{{ message.user }}</div>
+      </div>
+      <div class="bot-response">
+        <div class="message-bubble bot-bubble">{{ message.bot }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de entrada de mensaje -->
+  <div class="input-container">
+    <input [(ngModel)]="userMessage" placeholder="Escribe tu mensaje..." />
+    <button (click)="sendMessage()">Enviar</button>
+  </div>
+</div>

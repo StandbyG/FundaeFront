@@ -1,0 +1,95 @@
+/* login.component.scss */
+.login-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  padding: 0 10%;
+  background-color: #ffffff;
+}
+
+/* Formulario a la izquierda */
+.login-left {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.input-group .icon {
+  margin-right: 0.75rem;
+  color: #4caf50;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+/* Sección de error */
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+}
+
+/* Ilustración a la derecha */
+.login-right {
+  text-align: center;
+  background-color: #e0f7fa;
+}
+
+.login-right img {
+  width: 100%;
+  max-width: 350px;
+  margin-bottom: 1rem;
+}
+
+.login-right h3 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.login-right p {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-right button {
+  background-color: #4caf50;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+}

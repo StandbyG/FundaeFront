@@ -1,0 +1,32 @@
+/* Estilo para el formulario */
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para los campos del formulario */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Estilo para el botón de regresar */
+.btn-primary {
+  margin-top: 20px;
+}

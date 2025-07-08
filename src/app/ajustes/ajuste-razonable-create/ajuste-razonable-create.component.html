@@ -1,0 +1,43 @@
+<div class="container mt-4">
+  <!-- Botón para regresar al Dashboard -->
+  <button class="btn btn-primary mb-3" (click)="navigateToDashboard()">Regresar al Dashboard</button>
+
+  <h2>Crear Ajuste</h2>
+
+  <form (ngSubmit)="createAjuste()" #createAjusteForm="ngForm">
+    <div class="form-group">
+      <label for="tipoAjuste">Tipo de Ajuste:</label>
+      <input type="text" id="tipoAjuste" [(ngModel)]="tipoAjuste" name="tipoAjuste" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">Descripción:</label>
+      <textarea id="descripcion" [(ngModel)]="descripcion" name="descripcion" class="form-control" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="estado">Estado:</label>
+      <select id="estado" [(ngModel)]="estado" name="estado" class="form-control" required>
+        <option value="pendiente">Pendiente</option>
+        <option value="implementado">Implementado</option>
+        <option value="en revisión">En Revisión</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="fechaRecomendacion">Fecha de Recomendación:</label>
+      <input type="date" id="fechaRecomendacion" [(ngModel)]="fechaRecomendacion" name="fechaRecomendacion" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+      <label for="fechaImplementacion">Fecha de Implementación:</label>
+      <input type="date" id="fechaImplementacion" [(ngModel)]="fechaImplementacion" name="fechaImplementacion" class="form-control" required />
+    </div>
+
+    <!-- Campo oculto para el userId -->
+    <input type="hidden" [(ngModel)]="usuarioId" name="usuarioId" />
+
+    <!-- Botón para enviar el formulario -->
+    <button type="submit" class="btn btn-success mt-3" [disabled]="createAjusteForm.invalid">Crear Ajuste</button>
+  </form>
+</div>

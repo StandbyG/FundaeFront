@@ -1,0 +1,31 @@
+<div class="container mt-4">
+  <!-- Botón para regresar al Dashboard -->
+  <button class="btn btn-primary mb-3" (click)="navigateToDashboard()">Regresar al Dashboard</button>
+
+  <!-- Mensaje si no hay ajustes -->
+  <div *ngIf="ajustes.length === 0" class="alert alert-info">No hay ajustes disponibles.</div>
+
+  <!-- Tabla de Ajustes -->
+  <table *ngIf="ajustes.length > 0" class="table table-striped table-bordered">
+    <thead class="thead-dark">
+      <tr>
+        <th>Tipo de Ajuste</th>
+        <th>Descripción</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ajuste of ajustes">
+        <td>{{ ajuste.tipoAjuste }}</td>
+        <td>{{ ajuste.descripcion }}</td>
+        <td>{{ ajuste.estado }}</td>
+        <td>
+          <button class="btn btn-warning btn-sm" (click)="editAjuste(ajuste.idAjuste)">Editar</button>
+          <button class="btn btn-danger btn-sm" (click)="deleteAjuste(ajuste.idAjuste)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

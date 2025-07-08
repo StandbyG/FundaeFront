@@ -1,0 +1,38 @@
+<form (ngSubmit)="updateAjuste()">
+  <div class="form-group">
+    <label>Tipo de Ajuste:</label>
+    <input type="text" [value]="tipoAjuste" disabled />
+  </div>
+
+  <div class="form-group">
+    <label>Descripción:</label>
+    <textarea [value]="descripcion" disabled></textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Fecha de Recomendación:</label>
+    <input type="date" [value]="fechaRecomendacion" disabled />
+  </div>
+
+  <div class="form-group">
+    <label>Fecha de Implementación:</label>
+    <input type="date" [value]="fechaImplementacion" disabled />
+  </div>
+
+  <div class="form-group">
+    <label>Estado:</label>
+    <select [(ngModel)]="estado" name="estado" required>
+      <option value="pendiente">Pendiente</option>
+      <option value="aprobado">Aprobado</option>
+      <option value="rechazado">Rechazado</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Actualizar Estado</button>
+  <button type="button" class="btn btn-secondary" (click)="navigateToDashboard()">Cancelar</button>
+</form>
+
+<!-- Mensaje de éxito -->
+<div *ngIf="mensajeExito" class="alert alert-success mt-3">
+  {{ mensajeExito }}
+</div>
