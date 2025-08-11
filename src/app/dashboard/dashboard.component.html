@@ -1,33 +1,288 @@
-<div class="d-flex">
-  <!-- Barra lateral -->
-  <div class="sidebar">
-    <h3 class="text-center">Dashboard</h3>
-    <button class="btn btn-danger mt-3" (click)="signOut()">Cerrar sesión</button>
-    <button class="btn btn-primary w-100 mb-2" (click)="navigateToCreateAjuste()">Crear Ajuste Razonable</button>
-    <button class="btn btn-secondary w-100 mb-2" (click)="navigateToListAjustes()">Listar Ajustes Razonables</button>
-    <button class="btn btn-info w-100 mb-2" (click)="navigateToMyAjustes()">Mis Ajustes</button>
-    <button class="btn btn-success w-100 mb-2" (click)="navigateToSearchUsers()">Buscar Usuarios</button>
-    <button *ngIf="isAdmin" class="btn btn-warning w-100 mb-2" (click)="navigateToCreateVerificacion()">Crear Verificación</button>
-    <button class="btn btn-dark w-100 mb-2" (click)="toggleHistorial()">
-      {{ showHistorial ? 'Ocultar Historial Chatbot' : 'Ver Historial Chatbot' }}
-    </button>
-    <!-- Botón para mostrar/ocultar el chatbot -->
-    <button class="btn btn-success w-100 mt-4" (click)="toggleChatbot()">
-      {{ showChatbot ? 'Ocultar Chatbot' : 'Mostrar Chatbot' }}
-    </button>
-  </div>
+<nav class="navbar navbar-expand-lg fixed-top navbar-custom">
+  <div class="container-fluid">
+    <a class="navbar-brand" [routerLink]="['/dashboard']">
+      <img
+        src="assets/logo.png"
+        alt="Logo de la empresa"
+        width="30"
+        height="30"
+        class="d-inline-block align-text-top me-2"
+      />
+      Fundae
+    </a>
 
-  <!-- Contenido principal -->
-  <div class="main-content p-4 w-100">
-    <!-- Mostrar el chatbot solo si 'showChatbot' es verdadero -->
-    <div *ngIf="showChatbot">
-      <app-chatbot></app-chatbot>
-    </div>
-    <div *ngIf="showHistorial">
-      <app-historial-chatbot></app-historial-chatbot>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [routerLink]="['/dashboard']"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Dashboard</a
+          >
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            id="ajustesDropdown"
+            role="button"
+            aria-expanded="false"
+          >
+            Ajustes Razonables
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="ajustesDropdown">
+            <li>
+              <a class="dropdown-item" [routerLink]="['/ajustes/create']"
+                >Crear Ajuste</a
+              >
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                [routerLink]="['/ajustes']"
+                *ngIf="isAdmin"
+                >Listar Ajustes</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="['/ajustes/mis-ajustes']"
+                >Mis Ajustes</a
+              >
+            </li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown" *ngIf="isAdmin">
+          <a
+            class="nav-link dropdown-toggle"
+            id="adminDropdown"
+            role="button"
+            aria-expanded="false"
+          >
+            <i class="fa fa-cogs me-1"></i> Administración
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+            <li>
+              <a class="dropdown-item" [routerLink]="['/admin/usuarios']"
+                >Gestión de Usuarios</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="['/search']"
+                >Buscar Usuarios</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" [routerLink]="['/verificacion/create']"
+                >Crear Verificación</a
+              >
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+        <li class="nav-item">
+          <button
+            type="button"
+            class="nav-link btn"
+            (click)="toggleHistorial()"
+          >
+            {{ showHistorial ? "Ocultar Historial" : "Ver Historial" }}
+          </button>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="userDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i class="fa fa-user-circle me-1"></i> Mi Cuenta
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="userDropdown"
+          >
+            <li>
+              <a class="dropdown-item" [routerLink]="['/perfil']">
+                <i class="fa fa-user me-2"></i>Ver Perfil
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <button
+                type="button"
+                class="dropdown-item text-danger"
+                (click)="signOut()"
+              >
+                <i class="fa fa-sign-out-alt me-2"></i>Cerrar Sesión
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </div>
-  
-  
-  
+</nav>
+
+<main class="content-area">
+  <div class="container-fluid p-4">
+    <div *ngIf="!isLoading">
+      <h2 *ngIf="isAdmin" class="mb-3">Dashboard del Administrador</h2>
+      <h2 *ngIf="!isAdmin" class="mb-3">Mis Ajustes Razonables</h2>
+      <p class="text-muted">
+        Resumen de las solicitudes y su estado actual en el sistema.
+      </p>
+    </div>
+    <div *ngIf="isAdmin" class="search-bar mb-4">
+      <i class="fa fa-search search-icon"></i>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar por tipo, descripción o nombre de usuario..."
+        [(ngModel)]="searchTerm"
+        (input)="filterAjustes()"
+      />
+    </div>
+    <div
+      *ngIf="isLoading"
+      class="d-flex justify-content-center align-items-center"
+      style="min-height: 50vh"
+    >
+      <div
+        class="spinner-border text-primary"
+        style="width: 3rem; height: 3rem"
+        role="status"
+      >
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!isLoading && isAdmin && filteredAjustes.length > 0"
+      class="row"
+    >
+      <div
+        *ngFor="let ajuste of filteredAjustes"
+        class="col-12 col-md-6 col-lg-4 mb-4"
+      >
+        <div class="ajuste-card">
+          <div class="card-header">
+            <h5 class="card-title">{{ ajuste.tipoAjuste }}</h5>
+            <span class="badge" [ngClass]="getStatusClass(ajuste.estado)">{{
+              ajuste.estado
+            }}</span>
+          </div>
+          <div class="card-body">
+            <p class="card-text">{{ ajuste.descripcion }}</p>
+          </div>
+          <div class="card-footer">
+            <div class="user-info">
+              <i class="fa fa-user me-2"></i>
+              <span>{{ ajuste.usuario.nombreEmpresa }}</span>
+            </div>
+            <div class="date-info">
+              <i class="fa fa-calendar-alt me-2"></i>
+              <span>{{ ajuste.fechaImplementacion| date : "dd/MM/yyyy" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      *ngIf="!isLoading && !isAdmin && ajustes.length > 0"
+      class="card mt-4 shadow-sm"
+    ></div>
+
+    <div
+      *ngIf="!isLoading && filteredAjustes.length === 0"
+      class="alert alert-info mt-4"
+    >
+      <h4 class="alert-heading" *ngIf="isAdmin">No hay información</h4>
+      <p class="mb-0">
+        <span *ngIf="searchTerm"
+          >No se encontraron ajustes que coincidan con "{{ searchTerm }}".</span
+        >
+        <span *ngIf="!searchTerm && isAdmin"
+          >No hay ajustes registrados en el sistema.</span
+        >
+      </p>
+    </div>
+
+    <div
+      *ngIf="!isLoading && !isAdmin && ajustes.length > 0"
+      class="card mt-4 shadow-sm"
+    >
+      <div class="card-header">
+        <h5 class="card-title mb-0">Resumen de Mis Solicitudes</h5>
+      </div>
+      <div class="card-body chart-container">
+        <div class="chart-wrapper" style="position: relative; height: 350px">
+          <div class="chart-center-text">
+            <span class="total-number">{{ ajustes.length }}</span>
+            <span class="total-label">Total</span>
+          </div>
+          <canvas
+            *ngIf="doughnutChartData"
+            baseChart
+            [data]="doughnutChartData"
+            [type]="doughnutChartType"
+            [options]="doughnutChartOptions"
+            [plugins]="doughnutChartPlugins"
+          >
+          </canvas>
+        </div>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!isLoading && ajustes.length === 0"
+      class="alert alert-info mt-4"
+    >
+      <h4 class="alert-heading">No hay información</h4>
+      <p class="mb-0">
+        {{
+          isAdmin
+            ? "No se encontraron ajustes registrados en el sistema."
+            : "Aún no has solicitado ningún ajuste razonable."
+        }}
+      </p>
+    </div>
+  </div>
+</main>
+
+<button class="btn-chatbot-toggle" (click)="toggleChatbot()">
+  <i class="fa fa-comments"></i>
+</button>
+
+<div class="chatbot-container" [ngClass]="{ visible: showChatbot }">
+  <div *ngIf="showChatbot" class="chatbot-content">
+    <app-chatbot></app-chatbot>
+  </div>
+</div>
+<div class="offcanvas-backdrop" [class.visible]="showHistorial" (click)="toggleHistorial()"></div>
+
+<div class="historial-offcanvas" [class.visible]="showHistorial">
+  <div class="offcanvas-header">
+    <h4 class="offcanvas-title">Historial de Conversaciones</h4>
+    <button type="button" class="btn-close" (click)="toggleHistorial()"></button>
+  </div>
+  <div class="offcanvas-body">
+    <app-historial-chatbot></app-historial-chatbot>
+  </div>
 </div>

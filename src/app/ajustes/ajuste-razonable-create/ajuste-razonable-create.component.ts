@@ -1,69 +1,70 @@
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from './../../core/services/auth.services';
-import { Component } from '@angular/core';
 import { AjusteRazonableService } from '../../services/ajuste-razonable.service';
 import { CommonModule } from '@angular/common';
-
-import { AjusteRazonable } from '../../core/models/ajuste-razonable.model';
+// 👇 Importa las herramientas para Formularios Reactivos
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AjusteRazonableCreate } from '../../core/models/ajuste-razonable-create.model';
 
 @Component({
   selector: 'app-ajuste-razonable-create',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Incluir FormsModule aquí
+  imports: [CommonModule, ReactiveFormsModule,RouterLink], // 👈 Cambia FormsModule por ReactiveFormsModule
   templateUrl: './ajuste-razonable-create.component.html',
   styleUrls: ['./ajuste-razonable-create.component.scss']
 })
-export class AjusteRazonableCreateComponent {
-  tipoAjuste: string = '';
-  descripcion: string = '';
-  estado: string = 'pendiente';
-  fechaRecomendacion: string = '';  // Definir el campo de fecha
-  fechaImplementacion: string = '';  // Definir el campo de fecha
-  usuarioId: number = 1;  // Supongamos que el usuarioId es 1, asignar un valor adecuado
-  alertado: boolean = false;  // Asignar valor por defecto
+export class AjusteRazonableCreateComponent implements OnInit {
+  
+  ajusteForm: FormGroup; // 👈 Un solo objeto para manejar todo el formulario
 
-  constructor(private ajusteService: AjusteRazonableService, private router: Router, private authService: AuthService) {}
-
-  ngOnInit(): void {
-  // Obtener el userId desde el token al cargar el componente
-  const userId = this.authService.getUserId();
-  console.log('User ID desde el token:', userId);  // Verifica si el userId está llegando correctamente
-
-  if (userId !== null) {
-    this.usuarioId = userId;  // Asignar el userId del token
-  } else {
-    console.log('No se encuentra el userId o token no válido.');
-    this.router.navigate(['/login']);  // Redirigir al login si el userId no está presente
-  }
-}
-
-
-
-
-  createAjuste(): void {
-      if (!this.tipoAjuste || !this.descripcion || !this.fechaRecomendacion || !this.fechaImplementacion) {
-      alert('Por favor complete todos los campos');
-      return;  // No proceder si falta algún campo obligatorio
-    }
-    const nuevoAjuste: AjusteRazonable = {
-      tipoAjuste: this.tipoAjuste,
-      descripcion: this.descripcion,
-      estado: this.estado,
-      fechaRecomendacion: this.fechaRecomendacion,  // Asegurarse de que las fechas estén asignadas
-      fechaImplementacion: this.fechaImplementacion,  // Asegurarse de que las fechas estén asignadas
-      alertado: this.alertado,  // Incluir el campo alertado
-      usuarioId: this.usuarioId,  // Asegurarse de que el usuarioId esté asignado
-    };
-
-    this.ajusteService.createAjuste(nuevoAjuste).subscribe(() => {
-      this.router.navigate(['/ajustes']);
-    }, error => {
-      console.error('Error al crear ajuste:', error);
-      alert('Hubo un error al crear el ajuste. Intente nuevamente.');
+  constructor(
+    private fb: FormBuilder, // 👈 Inyecta el FormBuilder
+    private ajusteService: AjusteRazonableService, 
+    private router: Router, 
+    private authService: AuthService
+  ) {
+    // Inicializamos el formulario en el constructor
+    this.ajusteForm = this.fb.group({
+      tipoAjuste: ['', Validators.required],
+      descripcion: ['', Validators.required],
+      fechaRecomendacion: ['', Validators.required],
+      fechaImplementacion: ['', Validators.required],
+      estado: ['pendiente', Validators.required],
+      usuarioId: [null, Validators.required]
     });
   }
-    navigateToDashboard() {
-    this.router.navigate(['/dashboard']);  // Cambia '/dashboard' por la ruta correspondiente a tu Dashboard
+
+  ngOnInit(): void {
+    const userId = this.authService.getUserId();
+    if (userId) {
+      // Asigna el ID del usuario al campo correspondiente en el formulario
+      this.ajusteForm.patchValue({ usuarioId: userId });
+    } else {
+      console.log('No se encuentra el userId, redirigiendo al login.');
+      this.router.navigate(['/login']);
+    }
+  }
+
+  onSubmit(): void { // Renombrado de createAjuste a onSubmit
+    // La validación ahora es mucho más simple
+    if (this.ajusteForm.invalid) {
+      alert('Por favor complete todos los campos requeridos.');
+      return;
+    }
+
+    // El objeto del formulario ya coincide con nuestro modelo de creación
+    const nuevoAjuste: AjusteRazonableCreate = this.ajusteForm.value;
+
+    this.ajusteService.createAjuste(nuevoAjuste).subscribe({
+      next: () => {
+        alert('Ajuste creado con éxito');
+        this.router.navigate(['/dashboard']); // Redirigir al dashboard o a la lista
+      },
+      error: (err) => {
+        console.error('Error al crear ajuste:', err);
+        alert('Hubo un error al crear el ajuste. Intente nuevamente.');
+      }
+    });
   }
 }

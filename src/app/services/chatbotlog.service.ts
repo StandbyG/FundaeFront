@@ -1,43 +1,50 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ChatbotLog } from '../core/models/chatbot-log.model';
 import { AuthService } from '../core/services/auth.services';
+import { ChatbotLog } from '../core/models/chatbot-log.model';
+import { ChatbotLogCreate } from '../core/models/chatbot-log-create';
 
 
 @Injectable({ providedIn: 'root' })
-export class ChatbotLogService  {
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
+export class ChatbotLogService {
   private apiUrl = 'http://localhost:8080/api/chatbot-logs';
 
-  guardarConversacion(pregunta: string, respuesta: string): Observable<ChatbotLog> {
-    
-    const usuarioId = this.authService.getUserId();
-    const token = localStorage.getItem('token');
-    if (!usuarioId || !token) throw new Error('Usuario no autenticado');
-    const headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+  constructor(private http: HttpClient, private authService: AuthService) {}
+  
+  // Función centralizada para obtener las cabeceras
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    if (!token) {
+      return new HttpHeaders();
+    }
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
     });
-    const payload: Partial<ChatbotLog> = {
+  }
+
+  // MÉTODO CORREGIDO
+  guardarConversacion(pregunta: string, respuesta: string): Observable<ChatbotLog> {
+    const usuarioId = this.authService.getUserId();
+    if (!usuarioId) {
+      throw new Error('Usuario no autenticado, no se puede guardar el log.');
+    }
+
+    // Usa la nueva interfaz para el payload
+    const payload: ChatbotLogCreate = {
       pregunta,
       respuesta,
-      fecha: new Date(),
       usuarioId
     };
 
-
-    return this.http.post<ChatbotLog>(this.apiUrl, payload,{headers});
+    return this.http.post<ChatbotLog>(this.apiUrl, payload, { headers: this.getAuthHeaders() });
   }
+  
   getAllLogs(): Observable<ChatbotLog[]> {
-        const usuarioId = this.authService.getUserId();
-    const token = localStorage.getItem('token');
-    if (!usuarioId || !token) throw new Error('Usuario no autenticado');
-    const headers = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-    });
-  return this.http.get<ChatbotLog[]>(this.apiUrl,{headers});
+    return this.http.get<ChatbotLog[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  }
+
+  getLogsByUsuarioId(usuarioId: number): Observable<ChatbotLog[]> {
+    return this.http.get<ChatbotLog[]>(`${this.apiUrl}/usuario/${usuarioId}`, { headers: this.getAuthHeaders() });
   }
 }

@@ -1,10 +1,12 @@
+import { Usuario } from './usuario.model'; // Importas la interfaz de Usuario
+
 export interface AjusteRazonable {
-  idAjuste?: number; // Este campo es opcional para la creación
+  idAjuste: number; // Ya no es opcional, porque siempre lo recibes
   tipoAjuste: string;
   descripcion: string;
-  fechaRecomendacion: string; // Formato "YYYY-MM-DD"
-  fechaImplementacion: string; // Formato "YYYY-MM-DD"
-  estado: string; // valores posibles: "pendiente", "implementado", "en revisión"
+  fechaRecomendacion: string; // Se reciben como string
+  fechaImplementacion: string;
+  estado: string;
   alertado: boolean;
-  usuarioId: number; // ID del usuario que se asocia al ajuste
+  usuario: Usuario; // Recibes el objeto de usuario anidado
 }

@@ -1,40 +1,18 @@
-<div class="historial-container">
-  <h2>Historial de Conversaciones</h2>
-
-  <!-- Filtro por pregunta -->
-  <div class="filtros">
-    <input
-      type="text"
-      [(ngModel)]="filtroPregunta"
-      placeholder="Filtrar por pregunta..."
-      (input)="aplicarFiltros()"
-    />
-  </div>
-
-  <!-- Tabla de resultados -->
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Pregunta</th>
-        <th>Respuesta</th>
-        <th>Fecha</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let log of paginatedLogs; index as i">
-        <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
-        <td>{{ log.pregunta }}</td>
-        <td>{{ log.respuesta }}</td>
-        <td>{{ log.fecha | date: 'short' }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Paginación -->
-  <div class="paginacion">
-    <button (click)="cambiarPagina(-1)" [disabled]="currentPage === 1">Anterior</button>
-    <span>Página {{ currentPage }} de {{ totalPages() }}</span>
-    <button (click)="cambiarPagina(1)" [disabled]="currentPage === totalPages()">Siguiente</button>
+<div class="historial-list">
+  <div *ngIf="!logs || logs.length === 0" class="empty-state">
+    </div>
+  
+  <div *ngFor="let log of logs" class="log-entry">
+    <div class="log-icon user">
+      <i class="fa fa-user"></i>
+    </div>
+    <div class="log-content">
+      <p *ngIf="isAdmin" class="log-user-name">
+        <strong>Usuario:</strong> {{ log.usuario.nombre}}
+      </p>
+      <p class="log-question">{{ log.pregunta }}</p>
+      <p class="log-answer">{{ log.respuesta }}</p>
+      <span class="log-timestamp">{{ log.fecha | date:'medium' }}</span>
+    </div>
   </div>
 </div>

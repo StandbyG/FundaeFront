@@ -65,7 +65,7 @@ export class AuthService {
   const token = this.getToken();  // Obtén el token de localStorage
   if (!token) return null;  // Si no hay token, retorna null
   const decoded = this.jwtHelper.decodeToken(token);  // Decodifica el token
-  console.log(decoded);  // Para verificar el contenido del token
+  console.log('Contenido del token decodificado:', decoded);  // Para verificar el contenido del token
   return decoded?.userId || null;  // Asegúrate de que `userId` está presente en el token
   }
   decodeToken(token: string) {

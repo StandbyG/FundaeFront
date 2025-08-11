@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from '../core/services/auth.services';
 import { AjusteRazonable } from '../core/models/ajuste-razonable.model';
+import { AjusteRazonableCreate } from '../core/models/ajuste-razonable-create.model';
+import { AjusteEstadoUpdate } from '../core/models/AjusteEstadoUpdate';
 
 @Injectable({
   providedIn: 'root'
@@ -32,13 +34,6 @@ export class AjusteRazonableService {
     });
   }
 
-  // Función para crear un ajuste razonable
-  createAjuste(ajuste: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl + '/create', ajuste, {
-      headers: this.getAuthHeaders()
-    });
-  }
-
   // Función para obtener el token en las cabeceras
   private getAuthHeaders() {
     const token = this.authService.getToken();
@@ -53,6 +48,7 @@ export class AjusteRazonableService {
       headers: this.getAuthHeaders()
     });
   }
+  
 
   updateAjuste(id: number, ajuste: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}`, ajuste,{
@@ -77,4 +73,13 @@ export class AjusteRazonableService {
     headers: this.getAuthHeaders()
   });
   }
+  createAjuste(ajuste: AjusteRazonableCreate): Observable<any> { // 👈 Usa la nueva interfaz
+  return this.http.post<any>(this.apiUrl + '/create', ajuste, {
+    headers: this.getAuthHeaders()
+  });
+}
+updateAjusteEstado(id: number, datos: AjusteEstadoUpdate): Observable<AjusteRazonable> {
+  // Ahora llama al endpoint PATCH
+  return this.http.patch<AjusteRazonable>(`${this.apiUrl}/${id}`, datos, { headers: this.getAuthHeaders() });
+}
 }

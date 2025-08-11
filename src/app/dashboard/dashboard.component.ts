@@ -1,83 +1,252 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.services';
 import { CommonModule } from '@angular/common';
 import { ChatbotComponent } from '../chatbot/chatbot';
 import { HistorialChatbotComponent } from '../components/historial-chatbot/historial-chatbot';
-// ajusta la ruta si es diferente
+import { AjusteRazonable } from '../core/models/ajuste-razonable.model';
+import { AjusteRazonableService } from '../services/ajuste-razonable.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { FormsModule } from '@angular/forms';
+import { Dropdown } from 'bootstrap';
+
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  imports: [CommonModule, ChatbotComponent,HistorialChatbotComponent]
+  imports: [
+    CommonModule,
+    ChatbotComponent,
+    RouterModule,
+    HistorialChatbotComponent,
+    BaseChartDirective,
+    FormsModule  
+  ],
 })
-export class DashboardComponent implements OnInit {
-  showChatbot: boolean = false; // Controla si el chatbot es visible o no
-  isAdmin: boolean = false; // Para controlar si el usuario es administrador
+export class DashboardComponent implements OnInit , AfterViewInit {
 
-  constructor(private router: Router, private authService: AuthService) {}
+  // --- Propiedades del Componente ---
+  showChatbot: boolean = false;
+  showHistorial: boolean = false;
+  isAdmin: boolean = false;
+  isLoading: boolean = true;
+  ajustes: AjusteRazonable[] = [];
+  filteredAjustes: AjusteRazonable[] = []; 
+  searchTerm: string = ''; 
+
+  public doughnutChartData: ChartConfiguration<'doughnut'>['data'] | null = null;
+  public doughnutChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false, 
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom', // Mueve la leyenda abajo para dar más espacio
+        labels: {
+          boxWidth: 20,
+          padding: 20,
+          font: {
+            size: 14
+          }
+        }
+      },
+      tooltip: { // Mejora los tooltips al pasar el cursor
+        backgroundColor: 'rgba(0, 0,0, 0.8)',
+        titleFont: { size: 14 },
+        bodyFont: { size: 12 },
+        padding: 10,
+      },
+      datalabels: { // Muestra el porcentaje en cada sección del gráfico
+        formatter: (value, ctx) => {
+          if (ctx.chart.data.datasets[0].data) {
+            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => (a as number) + (b as number), 0) as number;
+            const percentage = ((value as number) / total * 100).toFixed(1) + '%';
+            return percentage;
+          }
+          return '';
+        },
+        color: '#fff',
+        font: {
+          weight: 'bold',
+          size: 16
+        }
+      },
+    },
+  };
+  public doughnutChartType: 'doughnut' = 'doughnut';
+  public doughnutChartPlugins = [ChartDataLabels]; 
+
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private ajusteService: AjusteRazonableService
+  ) {Chart.register(...registerables);}
 
   ngOnInit(): void {
-    // Verifica si el usuario está autenticado
+    // Si el usuario no está logueado, no debería estar aquí. Redirigir.
     if (!this.authService.isLoggedIn()) {
-    console.log("Usuario no autenticado, redirigiendo al login.");
-    this.router.navigate(['/login']);  // Redirige al login si no está autenticado
-  }else {
-    // Verificar si el usuario tiene rol de administrador
-    this.isAdmin = this.authService.getRole() === 'administrador';
-    console.log("Rol del usuario: ", this.authService.getRole());
+      this.router.navigate(['/login']);
+      return; // Detener la ejecución para evitar más comprobaciones
+    }
+
+    // Lógica de rol de usuario consolidada y más segura
+    const userRole = this.authService.getRole();
+    this.isAdmin = userRole?.toLowerCase() === 'administrador';
+    this.loadDashboardData();
   }
+  ngAfterViewInit(): void {
+    // Esta función se ejecuta DESPUÉS de que el HTML del componente se ha renderizado.
+    // Buscamos todos los elementos que activan un dropdown.
+    const dropdownElementList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    
+    // Por cada uno, creamos una nueva instancia del dropdown de Bootstrap para activarlo.
+        dropdownElementList.forEach(dropdownToggleEl => {
+      new Dropdown(dropdownToggleEl);
+    });
+
   }
 
-  // Redirigir al formulario de ajustes razonables
-  navigateToCreateAjuste() {
+  loadDashboardData(): void {
+    this.isLoading = true;
+
+    if (this.isAdmin) {
+      // --- LOG PARA ADMIN ---
+      this.ajusteService.getAllAjustes().subscribe((data) => {
+        this.ajustes = data;
+        this.filteredAjustes = data;
+        this.isLoading = false;
+      });
+    } else {
+      // --- LOG PARA USUARIO NORMAL ---
+      const userId = this.authService.getUserId();
+      if (userId) {
+        this.ajusteService.getAjustesByUsuarioId(userId).subscribe((data) => {
+          this.ajustes = data;
+          this.prepareChartData(); 
+          this.isLoading = false;
+        });
+      } else {
+        // Manejar el caso en que no hay ID para el usuario normal
+        this.isLoading = false;
+        console.error(
+          'No se pudo obtener el ID del usuario para cargar sus ajustes.'
+        );
+      }
+    }
+  }
+  filterAjustes(): void {
+    if (!this.searchTerm) {
+      this.filteredAjustes = this.ajustes;
+      return;
+    }
+    const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+    this.filteredAjustes = this.ajustes.filter(ajuste =>
+      ajuste.tipoAjuste.toLowerCase().includes(lowerCaseSearchTerm) ||
+      ajuste.descripcion.toLowerCase().includes(lowerCaseSearchTerm) ||
+      (ajuste.usuario?.nombre.toLowerCase().includes(lowerCaseSearchTerm))
+    );
+  }
+  private prepareChartData(): void {
+    const statusCounts = new Map<string, number>();
+    this.ajustes.forEach(ajuste => {
+      const status = ajuste.estado.charAt(0).toUpperCase() + ajuste.estado.slice(1);
+      statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
+    });
+
+    const labels = Array.from(statusCounts.keys());
+    const data = Array.from(statusCounts.values());
+
+    this.doughnutChartData = {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: [ // Paleta de colores más suave
+          '#FFC107', // Amarillo para Pendiente
+          '#28A745', // Verde para Aprobado
+          '#DC3545', // Rojo para Rechazado
+          '#6C757D'  // Gris para otros estados
+        ],
+        borderColor: '#fff', // Borde blanco para separar las secciones
+        borderWidth: 2,
+        hoverBorderColor: '#fff',
+      }]
+    };
+  }
+
+  // Función para dar estilo a los estados en la tabla
+  getStatusClass(estado: string): string {
+    switch (estado.toLowerCase()) {
+      case 'aprobado':
+        return 'badge bg-success';
+      case 'pendiente':
+        return 'badge bg-warning text-dark';
+      case 'rechazado':
+        return 'badge bg-danger';
+      default:
+        return 'badge bg-secondary';
+    }
+  }
+
+  // --- Métodos de Navegación ---
+  navigateToCreateAjuste(): void {
     this.router.navigate(['/ajustes/create']);
   }
 
-  // Redirigir a la lista de ajustes razonables
-  navigateToListAjustes() {
+  navigateToListAjustes(): void {
     this.router.navigate(['/ajustes']);
   }
 
-  // Redirigir a los ajustes del usuario autenticado
-  navigateToMyAjustes() {
+  navigateToMyAjustes(): void {
     const userId = this.authService.getUserId();
     if (userId) {
-      this.router.navigate([`/ajustes/usuario/${userId}`]);  // Ruta que debe existir
-    } else {
-      console.warn('Usuario no autenticado o token inválido.');
+      this.router.navigate([`/ajustes/usuario/${userId}`]);
     }
   }
 
-  // Redirigir a la página de búsqueda de usuarios si es administrador
-  navigateToSearchUsers() {
+  navigateToSearchUsers(): void {
+    // La comprobación de rol ya está implícita en la visibilidad del botón en el HTML,
+    // pero mantenerla aquí es una buena capa extra de seguridad.
     if (this.isAdmin) {
-      this.router.navigate(['/search']);  // Redirige a la página de búsqueda
-    } else {
-      console.warn('Solo los administradores pueden acceder a esta sección.');
+      this.router.navigate(['/search']);
     }
   }
 
-  navigateToCreateVerificacion() {
+  navigateToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  navigateToProfile(): void {
+    this.router.navigate(['/perfil']);
+  }
+
+  navigateToCreateVerificacion(): void {
     if (this.isAdmin) {
-      this.router.navigate(['/verificacion/create']);  // Redirige a la página de crear verificación
-    } else {
-      console.warn('Solo los administradores pueden acceder a esta sección.');
+      this.router.navigate(['/verificacion/create']);
     }
   }
 
-  toggleChatbot() {
-    this.showChatbot = !this.showChatbot; // Cambia la visibilidad del chatbot
+  // --- Métodos de Acciones de la UI ---
+  toggleChatbot(): void {
+    this.showChatbot = !this.showChatbot;
   }
-    signOut() {
-    this.authService.logout();  // Llama al método logout del servicio
-  }
-  showHistorial = false;
 
-toggleHistorial() {
-  this.showHistorial = !this.showHistorial;
-  if (this.showHistorial) this.showChatbot = false;
-}
+  toggleHistorial(): void {
+    this.showHistorial = !this.showHistorial;
+    // Buena práctica: si se muestra el historial, se oculta el chatbot
+    if (this.showHistorial) {
+      this.showChatbot = false;
+    }
+  }
+
+  signOut(): void {
+    // El servicio de autenticación ya se encarga de la redirección
+    this.authService.logout();
+  }
+  navigateToUserList(): void {
+    this.router.navigate(['/admin/usuarios']);
+  }
 }

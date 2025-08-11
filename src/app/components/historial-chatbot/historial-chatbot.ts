@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { ChatbotLog } from '../../core/models/chatbot-log.model';
 import { ChatbotLogService } from '../../services/chatbotlog.service';
+import { AuthService } from '../../core/services/auth.services';
 
 @Component({
   selector: 'app-historial-chatbot',
@@ -16,22 +17,31 @@ export class HistorialChatbotComponent implements OnInit {
   logs: ChatbotLog[] = [];
   filteredLogs: ChatbotLog[] = [];
   filtroPregunta: string = '';
+  isLoading = true;
+  isAdmin = false;
 
   pageSize = 10;
   currentPage = 1;
 
-  constructor(private chatbotLogService: ChatbotLogService) {}
+  constructor( private authService: AuthService,private chatbotLogService: ChatbotLogService) {}
 
   ngOnInit(): void {
-    this.chatbotLogService.getAllLogs().subscribe(
-      (data) => {
+    this.isAdmin = this.authService.getRole()?.toLowerCase() === 'administrador';
+    const userId = this.authService.getUserId();
+
+    if (this.isAdmin) {
+      // Si es admin, trae todos los logs
+      this.chatbotLogService.getAllLogs().subscribe(data => {
         this.logs = data;
-        this.aplicarFiltros();
-      },
-      (error) => {
-        console.error('Error al obtener historial:', error);
-      }
-    );
+        this.isLoading = false;
+      });
+    } else if (userId) {
+      // Si es usuario normal, trae solo sus logs
+      this.chatbotLogService.getLogsByUsuarioId(userId).subscribe(data => {
+        this.logs = data;
+        this.isLoading = false;
+      });
+    }
   }
 
   aplicarFiltros() {

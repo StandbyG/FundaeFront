@@ -8,6 +8,9 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminGuard } from './admin-guard';
 import { SearchComponent } from './search/search';
 import { CrearVerificacionComponent } from './crear-verificacion/crear-verificacion';
+import { ProfileComponent } from './components/profile/profile';
+import { UserListComponent } from './components/user-list/user-list';
+import { MisAjustesComponent } from './components/mis-ajustes/mis-ajustes';
 
 
 export const routes: Routes = [
@@ -16,16 +19,23 @@ export const routes: Routes = [
   { path: 'ajustes', component: AjusteRazonableListComponent },
   { path: 'ajustes/create', component: AjusteRazonableCreateComponent },
   { path: 'ajustes/edit/:id', component: AjusteRazonableEditComponent },
-  {
-    path: 'ajustes/usuario/:id',
-    loadComponent: () =>
-      import('./pages/mis-ajustes').then(m => m.MisAjustesComponent)
-  },
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'search', component: SearchComponent },  // Protegida por AdminGuard
+  { path: 'search', component: SearchComponent }, 
+  { 
+    path: 'admin/usuarios', 
+    component: UserListComponent,
+    canActivate: [AdminGuard] // 👈 PROTEGEMOS LA RUTA
+  },
   { path: 'verificacion/create', component: CrearVerificacionComponent },
-
-  { path: '**', redirectTo: 'login' },
+  { 
+    path: 'perfil', 
+    component: ProfileComponent
+  },
+    { 
+    path: 'ajustes/mis-ajustes', 
+    component: MisAjustesComponent
+  },
+  { path: '**', redirectTo: 'login' }
 
 ];
 

@@ -1,70 +1,87 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AjusteRazonableService } from '../../services/ajuste-razonable.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+// 👇 1. Importa las herramientas para Formularios Reactivos
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AjusteRazonableService } from '../../services/ajuste-razonable.service';
+import { AjusteRazonable } from '../../core/models/ajuste-razonable.model';
+import { AjusteEstadoUpdate } from '../../core/models/AjusteEstadoUpdate';
+
 
 @Component({
   selector: 'app-ajuste-razonable-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Incluir FormsModule aquí
+  imports: [
+    CommonModule,
+    ReactiveFormsModule // 👈 2. Usa ReactiveFormsModule en lugar de FormsModule
+  ],
   templateUrl: './ajuste-razonable-edit.component.html',
   styleUrls: ['./ajuste-razonable-edit.component.scss']
 })
 export class AjusteRazonableEditComponent implements OnInit {
-  id: number = 0;
-  tipoAjuste: string = '';
-  descripcion: string = '';
-  estado: string = 'pendiente';
-  ajusteCompleto: any = {};
-  mensajeExito: string = '';
-  fechaRecomendacion: string = '';
-  fechaImplementacion: string = '';
-  alertado: boolean = false;
-  usuarioId: number = 0;
+  
+  ajusteForm: FormGroup; // Para manejar los campos editables
+  ajusteCompleto: AjusteRazonable | null = null; // Para mostrar la información de solo lectura
+  ajusteId: number;
+  isLoading = true;
+  mensajeExito = '';
 
   constructor(
+    private fb: FormBuilder, // 👈 3. Inyecta FormBuilder
     private ajusteService: AjusteRazonableService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) {
+    // Obtenemos el ID desde la URL de forma segura
+    this.ajusteId = Number(this.route.snapshot.paramMap.get('id'));
+
+    // 4. Creamos el formulario solo con los campos que se pueden editar
+    this.ajusteForm = this.fb.group({
+      estado: ['', Validators.required],
+      fechaImplementacion: ['']
+    });
+  }
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
-    this.getAjuste();
+    if (!this.ajusteId) {
+      console.error('ID de ajuste no encontrado en la URL');
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
+    this.ajusteService.getAjusteById(this.ajusteId).subscribe(data => {
+      this.ajusteCompleto = data; // Guardamos los datos completos para la vista
+      
+      // Llenamos el formulario solo con los datos que se van a editar
+      this.ajusteForm.patchValue({
+        estado: data.estado,
+        fechaImplementacion: data.fechaImplementacion
+      });
+
+      this.isLoading = false;
+    });
   }
 
-getAjuste(): void {
-  this.ajusteService.getAjusteById(this.id).subscribe(ajuste => {
-    this.ajusteCompleto = ajuste;
+  onSubmit(): void {
+    if (this.ajusteForm.invalid) {
+      return;
+    }
 
-    // Para que puedas usar los campos en el template
-    this.tipoAjuste = ajuste.tipoAjuste;
-    this.descripcion = ajuste.descripcion;
-    this.estado = ajuste.estado;
-    this.fechaRecomendacion = ajuste.fechaRecomendacion;
-    this.fechaImplementacion = ajuste.fechaImplementacion;
-    this.alertado = ajuste.alertado;
-    this.usuarioId = ajuste.usuarioId;
-  });
-}
+    // 5. Creamos el objeto de actualización solo con los datos del formulario
+    const datosUpdate: AjusteEstadoUpdate = this.ajusteForm.value;
 
-updateAjuste(): void {
-  const updated = {
-    ...this.ajusteCompleto,
-    estado: this.estado
-  };
-
-  this.ajusteService.updateAjuste(this.id, updated).subscribe(() => {
-    this.mensajeExito = 'Estado actualizado con éxito';
-    setTimeout(() => this.mensajeExito = '', 3000);
-    this.router.navigate(['/ajustes']);
-  }, error => {
-    console.error('Error al actualizar:', error);
-    alert('No se pudo actualizar el ajuste.');
-  });
+    this.ajusteService.updateAjusteEstado(this.ajusteId, datosUpdate).subscribe({
+      next: () => {
+        this.mensajeExito = 'Estado actualizado con éxito';
+        setTimeout(() => {
+          this.mensajeExito = '';
+          this.router.navigate(['/dashboard']);
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('Error al actualizar:', err);
+        alert('No se pudo actualizar el ajuste.');
+      }
+    });
   }
-  navigateToDashboard(): void {
-  this.router.navigate(['/dashboard']);
-}
 }

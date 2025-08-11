@@ -1,0 +1,59 @@
+<div class="container mt-4">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Gestión de Usuarios</h2>
+      <p class="page-subtitle">Lista de todos los usuarios registrados en el sistema.</p>
+    </div>
+    <a [routerLink]="['/dashboard']" class="btn btn-outline-secondary">
+      <i class="fa fa-arrow-left me-2"></i>
+      Regresar al Dashboard
+    </a>
+  </div>
+
+  <div class="search-bar">
+    <i class="fa fa-search search-icon"></i>
+    <input 
+      type="text" 
+      class="form-control" 
+      placeholder="Buscar por nombre, correo o empresa..."
+      [(ngModel)]="searchTerm" 
+      (input)="filterUsers()"
+    >
+  </div>
+  
+  <div *ngIf="!isLoading && filteredUsers.length > 0" class="row">
+    <div *ngFor="let user of filteredUsers" class="col-12 col-md-6 col-lg-4 mb-4">
+      
+      <div class="user-card">
+        <div class="card-header">
+          <div class="user-avatar">
+            <span>{{ user.nombre.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="user-title">
+            <h5 class="user-name">{{ user.nombre }}</h5>
+            <p class="user-company">{{ user.nombreEmpresa || 'No especificada' }}</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="user-detail">
+            <i class="fa fa-envelope"></i>
+            <span>{{ user.correo }}</span>
+          </p>
+          <p class="user-detail">
+            <i class="fa fa-user-shield"></i>
+            <span class="badge" [ngClass]="user.tipoUsuario.toLowerCase() === 'administrador' ? 'bg-primary' : 'bg-secondary'">
+              {{ user.tipoUsuario }}
+            </span>
+          </p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-danger w-100" (click)="deleteUser(user.idUsuario)">
+            <i class="fa fa-trash me-2"></i> Eliminar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  
+  </div>
