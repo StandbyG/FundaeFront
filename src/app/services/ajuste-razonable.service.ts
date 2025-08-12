@@ -5,12 +5,13 @@ import { AuthService } from '../core/services/auth.services';
 import { AjusteRazonable } from '../core/models/ajuste-razonable.model';
 import { AjusteRazonableCreate } from '../core/models/ajuste-razonable-create.model';
 import { AjusteEstadoUpdate } from '../core/models/AjusteEstadoUpdate';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AjusteRazonableService {
-  private apiUrl = 'http://localhost:8080/api/ajustes';
+  private apiUrl = `${environment.apiUrl}/api/ajustes`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -26,6 +27,11 @@ export class AjusteRazonableService {
     });
   }
 
+  createAjustesBulk(ajustes: AjusteRazonableCreate[]): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/create-bulk`, ajustes, {
+    headers: this.getAuthHeaders()
+  });
+}
 
   // Función para obtener los ajustes razonables
   getAjustes(): Observable<any[]> {

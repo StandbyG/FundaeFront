@@ -4,11 +4,12 @@ import { Observable } from 'rxjs';
 import { AuthService } from '../core/services/auth.services';
 import { ChatbotLog } from '../core/models/chatbot-log.model';
 import { ChatbotLogCreate } from '../core/models/chatbot-log-create';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({ providedIn: 'root' })
 export class ChatbotLogService {
-  private apiUrl = 'http://localhost:8080/api/chatbot-logs';
+  private apiUrl = `${environment.apiUrl}/api/chatbot-logs`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
   

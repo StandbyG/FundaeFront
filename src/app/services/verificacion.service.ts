@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Verificacion } from '../core/models/verificacion.model';
- // Asegúrate de tener un modelo para Verificacion
-
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class VerificacionService {
 
-  private apiUrl = 'http://localhost:8080/api/verificaciones';  // URL del backend para crear una verificación
+  private apiUrl = `${environment.apiUrl}/api/verificaciones`;  // URL del backend para crear una verificación
 
   constructor(private http: HttpClient) {}
 
