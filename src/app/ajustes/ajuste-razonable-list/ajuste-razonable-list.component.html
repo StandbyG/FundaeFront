@@ -2,7 +2,9 @@
   <div class="page-header">
     <div>
       <h2 class="page-title">Listado de Ajustes Razonables</h2>
-      <p class="page-subtitle">Administra todas las solicitudes registradas en el sistema.</p>
+      <p class="page-subtitle">
+        Administra todas las solicitudes registradas en el sistema.
+      </p>
     </div>
     <div class="header-actions">
       <a [routerLink]="['/dashboard']" class="btn btn-outline-secondary">
@@ -37,7 +39,13 @@
             <tr *ngFor="let ajuste of ajustes">
               <td>
                 <div class="fw-bold">{{ ajuste.tipoAjuste }}</div>
-                <div class="text-muted small">{{ (ajuste.descripcion.length > 40) ? (ajuste.descripcion | slice:0:40) + '...' : ajuste.descripcion }}</div>
+                <div class="text-muted small">
+                  {{
+                    (ajuste.descripcion || "").length > 50
+                      ? (ajuste.descripcion | slice : 0 : 50) + "..."
+                      : ajuste.descripcion || "Sin descripción"
+                  }}
+                </div>
               </td>
               <td>{{ ajuste.usuario?.nombre }}</td>
               <td>
@@ -45,12 +53,23 @@
                   {{ ajuste.estado }}
                 </span>
               </td>
-              <td>{{ ajuste.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
+              <td>{{ ajuste.fechaSolicitud | date : "dd/MM/yyyy" }}</td>
               <td class="text-end action-buttons">
-                <a [routerLink]="['/ajustes/edit', ajuste.idAjuste]" class="btn-action text-primary" data-bs-toggle="tooltip" title="Editar Ajuste">
+                <a
+                  [routerLink]="['/ajustes/edit', ajuste.idAjuste]"
+                  class="btn-action text-primary"
+                  data-bs-toggle="tooltip"
+                  title="Editar Ajuste"
+                >
                   <i class="fa fa-pencil-alt"></i>
                 </a>
-                <button type="button" class="btn-action text-danger" (click)="deleteAjuste(ajuste.idAjuste)" data-bs-toggle="tooltip" title="Eliminar Ajuste">
+                <button
+                  type="button"
+                  class="btn-action text-danger"
+                  (click)="deleteAjuste(ajuste.idAjuste)"
+                  data-bs-toggle="tooltip"
+                  title="Eliminar Ajuste"
+                >
                   <i class="fa fa-trash-alt"></i>
                 </button>
               </td>
@@ -59,7 +78,10 @@
         </table>
       </div>
 
-      <div *ngIf="!isLoading && ajustes.length === 0" class="alert alert-light text-center">
+      <div
+        *ngIf="!isLoading && ajustes.length === 0"
+        class="alert alert-light text-center"
+      >
         No se encontraron ajustes registrados.
       </div>
     </div>

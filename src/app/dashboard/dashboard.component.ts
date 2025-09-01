@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.services';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,7 @@ import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { FormsModule } from '@angular/forms';
 import { Dropdown } from 'bootstrap';
-
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,24 +24,26 @@ import { Dropdown } from 'bootstrap';
     RouterModule,
     HistorialChatbotComponent,
     BaseChartDirective,
-    FormsModule  
+    FormsModule,
   ],
 })
-export class DashboardComponent implements OnInit , AfterViewInit {
-
+export class DashboardComponent implements OnInit, AfterViewInit {
   // --- Propiedades del Componente ---
   showChatbot: boolean = false;
   showHistorial: boolean = false;
   isAdmin: boolean = false;
   isLoading: boolean = true;
+  userMenuOpen = false;
   ajustes: AjusteRazonable[] = [];
-  filteredAjustes: AjusteRazonable[] = []; 
-  searchTerm: string = ''; 
+  filteredAjustes: AjusteRazonable[] = [];
+  openDropdown: string | null = null;
+  searchTerm: string = '';
 
-  public doughnutChartData: ChartConfiguration<'doughnut'>['data'] | null = null;
+  public doughnutChartData: ChartConfiguration<'doughnut'>['data'] | null =
+    null;
   public doughnutChartOptions: ChartConfiguration['options'] = {
     responsive: true,
-    maintainAspectRatio: false, 
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: true,
@@ -50,21 +52,26 @@ export class DashboardComponent implements OnInit , AfterViewInit {
           boxWidth: 20,
           padding: 20,
           font: {
-            size: 14
-          }
-        }
+            size: 14,
+          },
+        },
       },
-      tooltip: { // Mejora los tooltips al pasar el cursor
+      tooltip: {
         backgroundColor: 'rgba(0, 0,0, 0.8)',
         titleFont: { size: 14 },
         bodyFont: { size: 12 },
         padding: 10,
       },
-      datalabels: { // Muestra el porcentaje en cada sección del gráfico
+      datalabels: {
+        // Muestra el porcentaje en cada sección del gráfico
         formatter: (value, ctx) => {
           if (ctx.chart.data.datasets[0].data) {
-            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => (a as number) + (b as number), 0) as number;
-            const percentage = ((value as number) / total * 100).toFixed(1) + '%';
+            const total = ctx.chart.data.datasets[0].data.reduce(
+              (a, b) => (a as number) + (b as number),
+              0
+            ) as number;
+            const percentage =
+              (((value as number) / total) * 100).toFixed(1) + '%';
             return percentage;
           }
           return '';
@@ -72,19 +79,22 @@ export class DashboardComponent implements OnInit , AfterViewInit {
         color: '#fff',
         font: {
           weight: 'bold',
-          size: 16
-        }
+          size: 16,
+        },
       },
     },
   };
   public doughnutChartType: 'doughnut' = 'doughnut';
-  public doughnutChartPlugins = [ChartDataLabels]; 
+  public doughnutChartPlugins = [ChartDataLabels];
 
   constructor(
     private router: Router,
-    private authService: AuthService,
-    private ajusteService: AjusteRazonableService
-  ) {Chart.register(...registerables);}
+    public authService: AuthService,
+    private ajusteService: AjusteRazonableService,
+    public themeService: ThemeService
+  ) {
+    Chart.register(...registerables);
+  }
 
   ngOnInit(): void {
     // Si el usuario no está logueado, no debería estar aquí. Redirigir.
@@ -101,13 +111,14 @@ export class DashboardComponent implements OnInit , AfterViewInit {
   ngAfterViewInit(): void {
     // Esta función se ejecuta DESPUÉS de que el HTML del componente se ha renderizado.
     // Buscamos todos los elementos que activan un dropdown.
-    const dropdownElementList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-    
+    const dropdownElementList = document.querySelectorAll(
+      '[data-bs-toggle="dropdown"]'
+    );
+
     // Por cada uno, creamos una nueva instancia del dropdown de Bootstrap para activarlo.
-        dropdownElementList.forEach(dropdownToggleEl => {
+    dropdownElementList.forEach((dropdownToggleEl) => {
       new Dropdown(dropdownToggleEl);
     });
-
   }
 
   loadDashboardData(): void {
@@ -126,7 +137,7 @@ export class DashboardComponent implements OnInit , AfterViewInit {
       if (userId) {
         this.ajusteService.getAjustesByUsuarioId(userId).subscribe((data) => {
           this.ajustes = data;
-          this.prepareChartData(); 
+          this.prepareChartData();
           this.isLoading = false;
         });
       } else {
@@ -139,21 +150,32 @@ export class DashboardComponent implements OnInit , AfterViewInit {
     }
   }
   filterAjustes(): void {
-    if (!this.searchTerm) {
-      this.filteredAjustes = this.ajustes;
+    const term = this.searchTerm.trim().toLowerCase();
+
+    if (!term) {
+      this.filteredAjustes = this.ajustes; // mostrar todos si no hay término
       return;
     }
-    const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
-    this.filteredAjustes = this.ajustes.filter(ajuste =>
-      ajuste.tipoAjuste.toLowerCase().includes(lowerCaseSearchTerm) ||
-      ajuste.descripcion.toLowerCase().includes(lowerCaseSearchTerm) ||
-      (ajuste.usuario?.nombre.toLowerCase().includes(lowerCaseSearchTerm))
-    );
+
+    this.filteredAjustes = this.ajustes.filter((ajuste) => {
+      const tipo = ajuste.tipoAjuste?.toLowerCase() || '';
+      const descripcion = ajuste.descripcion?.toLowerCase() || '';
+      const estado = ajuste.estado?.toLowerCase() || '';
+      const usuario = ajuste.usuario?.nombre?.toLowerCase() || '';
+
+      return (
+        tipo.includes(term) ||
+        descripcion.includes(term) ||
+        estado.includes(term) ||
+        usuario.includes(term)
+      );
+    });
   }
   private prepareChartData(): void {
     const statusCounts = new Map<string, number>();
-    this.ajustes.forEach(ajuste => {
-      const status = ajuste.estado.charAt(0).toUpperCase() + ajuste.estado.slice(1);
+    this.ajustes.forEach((ajuste) => {
+      const status =
+        ajuste.estado.charAt(0).toUpperCase() + ajuste.estado.slice(1);
       statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
     });
 
@@ -162,22 +184,23 @@ export class DashboardComponent implements OnInit , AfterViewInit {
 
     this.doughnutChartData = {
       labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: [ // Paleta de colores más suave
-          '#FFC107', // Amarillo para Pendiente
-          '#28A745', // Verde para Aprobado
-          '#DC3545', // Rojo para Rechazado
-          '#6C757D'  // Gris para otros estados
-        ],
-        borderColor: '#fff', // Borde blanco para separar las secciones
-        borderWidth: 2,
-        hoverBorderColor: '#fff',
-      }]
+      datasets: [
+        {
+          data: data,
+          backgroundColor: [
+            '#FFC107', // Amarillo para Pendiente
+            '#28A745', // Verde para Aprobado
+            '#DC3545', // Rojo para Rechazado
+            '#6C757D', // Gris para otros estados
+          ],
+          borderColor: '#fff', // Borde blanco para separar las secciones
+          borderWidth: 2,
+          hoverBorderColor: '#fff',
+        },
+      ],
     };
   }
 
-  // Función para dar estilo a los estados en la tabla
   getStatusClass(estado: string): string {
     switch (estado.toLowerCase()) {
       case 'aprobado':
@@ -208,8 +231,6 @@ export class DashboardComponent implements OnInit , AfterViewInit {
   }
 
   navigateToSearchUsers(): void {
-    // La comprobación de rol ya está implícita en la visibilidad del botón en el HTML,
-    // pero mantenerla aquí es una buena capa extra de seguridad.
     if (this.isAdmin) {
       this.router.navigate(['/search']);
     }
@@ -248,5 +269,23 @@ export class DashboardComponent implements OnInit , AfterViewInit {
   }
   navigateToUserList(): void {
     this.router.navigate(['/admin/usuarios']);
+  }
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+  toggleUserMenu(event: MouseEvent) {
+    event.preventDefault();
+    this.userMenuOpen = !this.userMenuOpen;
+  }
+  @HostListener('document:click', ['$event'])
+  closeOnOutsideClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.nav-item.dropdown')) {
+      this.userMenuOpen = false;
+    }
+  }
+  toggleDropdown(menu: string, event: MouseEvent) {
+    event.preventDefault();
+    this.openDropdown = this.openDropdown === menu ? null : menu;
   }
 }

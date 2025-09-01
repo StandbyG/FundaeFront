@@ -1,371 +1,410 @@
-/* =================================================================
-   1. VARIABLES Y ESTILOS GLOBALES
-   ================================================================= */
+/* =========================================================
+   1) TOKENS (Light) + Dark with .dark-theme + auto by prefers-color-scheme
+   ========================================================= */
 :root {
-  --primary-color: #005A9C; /* Azul corporativo oscuro */
-  --accent-color: #4CAF50;  /* Verde para acciones positivas */
-  --light-bg: #f4f7f6;      /* Un fondo grisáceo muy suave, más profesional */
-  --text-color: #333333;
-  --text-muted: #6c757d;    /* Color para texto secundario */
+  --primary: #0b5ed7;
+  --primary-600: #0a53be;
+  --accent: #22b07d;
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --text: #222;
+  --muted: #657383;
+  --border: #e5e9f0;
+  --shadow: 0 8px 24px rgba(20, 20, 20, 0.06);
+
+  --navbar-bg: var(--primary);
   --navbar-text: #ffffff;
-  --navbar-hover-bg: #004a80;
-  --card-bg: #ffffff;
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Sombra suave para las tarjetas */
-  --border-color: #dee2e6;
+  --navbar-hover: rgba(255, 255, 255, 0.12);
+  --card-hover-raise: translateY(-4px);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0f13;
+    --surface: #161a20;
+    --text: #e7ecf3;
+    --muted: #9aa7b4;
+    --border: #222935;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --navbar-bg: #0f172a;
+    --navbar-text: #dbe4f3;
+    --navbar-hover: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Force Dark with body.dark-theme */
+body.dark-theme {
+  --bg: #0e0f13;
+  --surface: #161a20;
+  --text: #e7ecf3;
+  --muted: #9aa7b4;
+  --border: #222935;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --navbar-bg: #0f172a;
+  --navbar-text: #dbe4f3;
+  --navbar-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Base */
 body {
-  background-color: var(--light-bg);
-  font-family: 'Poppins', sans-serif; /* Asegúrate de importar esta fuente */
-  color: var(--text-color);
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
-/* =================================================================
-   2. BARRA DE NAVEGACIÓN (NAVBAR)
-   ================================================================= */
+/* Utilities */
+.btn-icon {
+  border: none;
+  background: transparent;
+  color: var(--navbar-text);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  transition: background 0.2s ease;
+  &:hover {
+    background: var(--navbar-hover);
+  }
+}
+
+.btn-ghost {
+  border-radius: 8px;
+  color: var(--navbar-text);
+  background: transparent;
+  &:hover {
+    background: var(--navbar-hover);
+    color: var(--navbar-text);
+  }
+}
+
+.logo {
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.2));
+}
+.brand-text {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* =========================================================
+   2) NAVBAR
+   ========================================================= */
 .navbar-custom {
-  background-color: var(--primary-color) !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem 1rem;
+  background: var(--navbar-bg) !important;
+  color: var(--navbar-text);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  .navbar-brand,
+  .nav-link,
+  .dropdown-item,
+  .btn {
+    color: var(--navbar-text) !important;
+  }
+  .nav-link {
+    border-radius: 10px;
+    padding: 0.55rem 0.8rem;
+    margin: 0 0.2rem;
+    display: inline-flex;
+    align-items: center;
+    &:hover {
+      background: var(--navbar-hover);
+    }
+    &.active {
+      background: var(--navbar-hover);
+      font-weight: 600;
+    }
+  }
+  .dropdown-menu {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.4rem;
+    box-shadow: var(--shadow);
+    .dropdown-item {
+      color: var(--text) !important;
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+    }
+    .dropdown-item.text-danger:hover {
+      background: rgba(220, 53, 69, 0.12) !important;
+    }
+  }
 }
 
-.navbar-custom .nav-link,
-.navbar-custom .btn {
-  color: var(--navbar-text) !important;
-  border-radius: 6px;
-  transition: all 0.2s ease-in-out;
+/* Search (header) */
+.nav-search {
+  width: min(520px, 40vw);
 }
-
-.navbar-custom .nav-link:hover,
-.navbar-custom .btn-outline-light:hover {
-  background-color: var(--navbar-hover-bg);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.navbar-custom .nav-link.active {
-  background-color: var(--navbar-hover-bg);
-  font-weight: 500;
-}
-
-.navbar-custom .dropdown-item:hover {
-  transform: translateX(4px);
-  color: var(--navbar-text) !important;
-  background-color: var(--primary-color) !important;
-}
-
-.navbar-custom .dropdown-item.text-danger:hover {
-  background-color: #dc3545 !important;
-  color: #ffffff !important;
-}
-
-
-/* =================================================================
-   DASHBOARD ADMIN: TARJETAS DE AJUSTES Y BUSCADOR
-   ================================================================= */
 .search-bar {
   position: relative;
 }
 .search-icon {
   position: absolute;
-  left: 20px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #adb5bd;
+  color: var(--muted);
 }
 .search-bar .form-control {
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
-  border-radius: 10px;
-}
-
-.ajuste-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-  &:hover {
-    transform: translateY(-5px);
+  padding: 0.7rem 0.9rem 0.7rem 2.2rem;
+  outline: none;
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
   }
 }
-.ajuste-card .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: transparent;
-  border-bottom: 1px solid var(--border-color);
-}
-.ajuste-card .card-title {
-  font-weight: 600;
-  margin-bottom: 0;
-}
-.ajuste-card .card-body {
-  flex-grow: 1;
-}
-.ajuste-card .card-footer {
-  background-color: var(--light-bg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #6c757d;
+
+/* Avatar circle */
+.avatar {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-block;
 }
 
-/* =================================================================
-   3. ÁREA DE CONTENIDO PRINCIPAL (NUEVO Y MEJORADO)
-   ================================================================= */
-
+/* =========================================================
+   3) PAGE LAYOUT
+   ========================================================= */
 .content-area {
-  padding-top: 80px; /* Un poco más de espacio para la navbar */
+  padding-top: 82px;
+}
+.page-header {
+  margin-bottom: 1rem;
 }
 
-/* Estilo general para las tarjetas del dashboard */
+.loader-wrap {
+  min-height: 45vh;
+  display: grid;
+  place-items: center;
+}
+
+/* =========================================================
+   4) CARDS + TABLE-LIKE
+   ========================================================= */
 .card {
-  border: none; /* Quitamos los bordes por defecto */
-  border-radius: 12px; /* Bordes más redondeados */
-  box-shadow: var(--card-shadow);
-  background-color: var(--card-bg);
-  transition: all 0.3s ease;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  &:hover {
+    transform: var(--card-hover-raise);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  }
 }
-
-.card:hover {
-  transform: translateY(-5px); /* Efecto de elevación al pasar el cursor */
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-}
-
 .card-header {
-  background-color: transparent;
-  border-bottom: 1px solid var(--border-color);
-  padding: 1.25rem 1.5rem;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem;
 }
-
 .card-title {
-  font-weight: 600;
-  color: var(--primary-color);
+  color: var(--text);
+  font-weight: 700;
 }
 
-.card-body {
-  padding: 1.5rem;
+/* Ajuste Card */
+.ajuste-card {
+  @extend .card;
+  .card-body {
+    padding: 1rem 1.25rem;
+  }
+  .card-footer {
+    background: color-mix(in oklab, var(--surface) 85%, var(--bg));
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+  }
 }
 
-/* Estilo mejorado para la tabla de administradores */
-.table {
-  border-collapse: separate;
-  border-spacing: 0 8px; /* Espacio vertical entre filas */
+/* Multi-line clamp */
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.table th {
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  border: none;
-}
-
-.table td {
-  background-color: #fdfdfd;
-  border: none;
-  padding: 1rem;
-}
-
-/* Estilo para que las filas de la tabla se vean como tarjetas individuales */
-.table tbody tr {
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s ease;
-}
-
-.table-hover tbody tr:hover {
-  transform: scale(1.02);
-  z-index: 10;
-}
-
-/* Estilo para las insignias de estado (badges) */
+/* Badges status */
 .badge {
-  padding: 0.5em 0.8em;
   font-weight: 600;
-  font-size: 0.75rem;
+  border-radius: 999px;
+  padding: 0.45em 0.7em;
+}
+.bg-success {
+  background: #28a745 !important;
+}
+.bg-warning {
+  background: #ffc107 !important;
+  color: #111 !important;
+}
+.bg-danger {
+  background: #dc3545 !important;
+}
+.bg-secondary {
+  background: #6c757d !important;
 }
 
+/* Chart center labels */
 .chart-container {
   position: relative;
-  max-width: 400px;
-  margin: auto;
+  max-width: 460px;
+  margin-inline: auto;
 }
-
-.chart-wrapper {
-  position: relative;
-}
-
 .chart-center-text {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  display: grid;
+  place-items: center;
   text-align: center;
-  pointer-events: none; /* Para que no interfiera con el tooltip del gráfico */
+  pointer-events: none;
+  .total-number {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .total-label {
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
 }
 
-.total-number {
-  display: block;
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--primary-color);
+/* Empty state */
+.empty-state {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: center;
 }
 
-.total-label {
-  display: block;
-  font-size: 1rem;
-  color: var(--text-muted);
-}
-
-/* =================================================================
-   4. BOTÓN FLOTANTE
-   ================================================================= */
+/* =========================================================
+   5) CHATBOT FLOATING & PANEL
+   ========================================================= */
 .btn-chatbot-toggle {
   position: fixed;
-  bottom: 25px;
-  right: 25px;
-  width: 60px;
-  height: 60px;
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  font-size: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  display: grid;
+  place-items: center;
+  border: none;
   cursor: pointer;
+  background: green;
+  color: #fff;
+  font-size: 22px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   z-index: 1000;
-  transition: transform 0.2s ease;
+  &:hover {
+    transform: scale(1.06);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  }
 }
 
-.btn-chatbot-toggle:hover {
-    transform: scale(1.1);
-}
 .chatbot-container {
   position: fixed;
-  bottom: 100px; /* Justo encima del botón de toggle */
-  right: 25px;
-  width: 350px;
-  max-height: 500px;
-  z-index: 1050;
-  /* Estado inicial (oculto) */
+  right: 24px;
+  bottom: 96px;
+  width: min(420px, 92vw);
+  max-height: min(70vh, 620px);
   opacity: 0;
-  transform: translateY(20px) scale(0.95);
-  transition: all 0.3s ease-in-out;
-  pointer-events: none; /* No se puede interactuar cuando está oculto */
+  transform: translateY(12px) scale(0.98);
+  pointer-events: none;
+  transition: all 0.22s ease;
+  z-index: 1050;
+  &.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
 }
-
-.chatbot-container.visible {
-  /* Estado final (visible) */
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto; /* Se puede interactuar */
-}
-
 .chatbot-content {
-  background: #fff;
-  border-radius: 15px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   overflow: hidden;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.dropdown {
-  position: relative; // Necesario para posicionar el menú hijo
+  box-shadow: var(--shadow);
 }
 
-.dropdown .dropdown-menu {
-  display: none; // El menú está oculto por defecto
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-}
-
-/* LA MAGIA: Muestra el menú al pasar el cursor sobre el contenedor .dropdown */
-.dropdown:hover > .dropdown-menu {
-  display: block; // Muestra el menú
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* =================================================================
-   ESTILOS PARA EL PANEL LATERAL (OFF-CANVAS) DEL HISTORIAL
-   ================================================================= */
-
-/* Fondo semitransparente */
+/* =========================================================
+   6) OFFCANVAS HISTORIAL
+   ========================================================= */
 .offcanvas-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1040;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  pointer-events: none; /* No se puede hacer clic cuando está oculto */
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1040;
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
-
-.offcanvas-backdrop.visible {
-  opacity: 1;
-  pointer-events: auto; /* Se puede hacer clic para cerrar */
-}
-
-/* Panel deslizable */
 .historial-offcanvas {
   position: fixed;
   top: 0;
   right: 0;
-  width: 100%;
-  max-width: 450px; /* Ancho del panel */
   height: 100%;
-  background-color: #fff;
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  color: var(--text);
+  border-left: 1px solid var(--border);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
   z-index: 1045;
-  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  /* Estado inicial (oculto) */
-  transform: translateX(100%);
-  transition: transform 0.3s ease-in-out;
-}
-
-.historial-offcanvas.visible {
-  /* Estado final (visible) */
-  transform: translateX(0);
-}
-
-.offcanvas-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.offcanvas-title {
-  margin: 0;
-  font-weight: 600;
-}
-
-.btn-close {
-  background: transparent;
-  border: 0;
-  font-size: 1.5rem;
-  opacity: 0.5;
-  &:hover {
-    opacity: 1;
+  &.visible {
+    transform: translateX(0);
   }
 }
-
+.offcanvas-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
 .offcanvas-body {
-  flex-grow: 1;
-  padding: 1.5rem;
-  overflow-y: auto; /* Permite scroll si el contenido es largo */
+  padding: 1rem 1.25rem;
+  overflow: auto;
+}
+
+/* =========================================================
+   7) RESPONSIVE
+   ========================================================= */
+@media (max-width: 991.98px) {
+  .nav-search {
+    width: 100%;
+  }
+  .brand-text {
+    display: none;
+  }
+}
+@media (max-width: 575.98px) {
+  .btn-chatbot-toggle {
+    right: 16px;
+    bottom: 16px;
+  }
+  .chatbot-container {
+    right: 16px;
+    bottom: 84px;
+  }
 }
